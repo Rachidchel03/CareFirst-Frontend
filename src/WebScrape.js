@@ -19,7 +19,7 @@ import {
   CircularProgress,
   Alert
 } from '@mui/material';
-axios.defaults.baseURL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000';
+axios.defaults.baseURL = process.env.REACT_APP_API_BASE_URL;
 const WebScrape = () => {
   const [url, setUrl] = useState('');
   const [pages, setPages] = useState(1);
