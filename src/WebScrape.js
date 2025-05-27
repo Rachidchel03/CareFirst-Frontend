@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import axios from "axios";
+import axios from "./api";
+import { fetchBestemming } from "./api";
 import DownloadExcel from "./DownloadExcel";
 
 import {
@@ -16,8 +17,9 @@ import {
   TableRow,
   CircularProgress,
   Alert,
+  Box,
 } from "@mui/material";
-const API_BASE = process.env.REACT_APP_API_BASE_URL || "";
+
 export default function WebScrape() {
   const [url, setUrl] = useState("");
   const [pages, setPages] = useState(1);
@@ -30,30 +32,52 @@ export default function WebScrape() {
   const handleScrape = async () => {
     setLoading(true);
     setError("");
+    setListings([]);
+    setTimestamp("");
+
     try {
-      const payload = {
+      const fieldsArray = fields
+        ? fields.split(",").map((f) => f.trim())
+        : [];
+      const resp = await axios.post("/api/scrape", {
         url,
         pages,
-        fields: fields
-          ? fields.split(",").map((f) => f.trim())
-          : [],
-      };
-      const res = await axios.post(
-        `${API_BASE}/api/scrape`,
-        payload
+        fields: fieldsArray,
+      });
+      const container = resp.data.data;
+      const ts = resp.data.timestamp;
+
+      if (!container?.listings) {
+        throw new Error("Server response malformed: no listings");
+      }
+
+      // enrich each listing with bestemmingsplan via frontend API call
+      const enriched = await Promise.all(
+        container.listings.map(async (item) => {
+          const addr = item.Adress || item.address || item.adres || "";
+          try {
+            const ai = await fetchBestemming(addr);
+            return { ...item, bestemmingsplan: ai.bestemming || [] };
+          } catch {
+            return { ...item, bestemmingsplan: [] };
+          }
+        })
       );
-      setListings(res.data.data.listings);
-      setTimestamp(res.data.timestamp);
-    } catch (err) {
-      console.error(err);
-      setError(err.response?.data?.detail || err.message);
+
+      setListings(enriched);
+      setTimestamp(ts);
+    } catch (e) {
+      console.error(e);
+      setError(e.response?.data?.detail || e.message || "Onbekende fout");
     } finally {
       setLoading(false);
     }
   };
 
   const renderTable = (rows) => {
-    if (!rows.length) return <Typography>No listings found.</Typography>;
+    if (!rows.length) {
+      return <Typography>No listings found.</Typography>;
+    }
     const headers = Object.keys(rows[0]);
     return (
       <TableContainer component={Paper} sx={{ maxHeight: 400, mt: 2 }}>
@@ -104,38 +128,46 @@ export default function WebScrape() {
         Funda & Bestemmingsplan Dashboard
       </Typography>
 
-      <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+      <Box
+        sx={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: 2,
+          alignItems: "center",
+          mb: 2,
+        }}
+      >
         <TextField
           label="URL"
+          size="small"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           fullWidth
-          size="small"
         />
         <TextField
           label="Pages"
           type="number"
-          value={pages}
-          onChange={(e) => setPages(+e.target.value)}
           size="small"
+          value={pages}
+          onChange={(e) => setPages(Number(e.target.value))}
           sx={{ width: 100 }}
         />
         <TextField
           label="Fields (comma separated)"
+          size="small"
           value={fields}
           onChange={(e) => setFields(e.target.value)}
           fullWidth
-          size="small"
         />
         <Button
           variant="contained"
           onClick={handleScrape}
           disabled={loading}
-          sx={{ whiteSpace: "nowrap", px: 4 }}
+          sx={{ width: 200 }}
         >
-          {loading ? <CircularProgress size={24} /> : "Scrape & Export"}
+          {loading ? <CircularProgress size={24} /> : "Scrape & Enrich"}
         </Button>
-      </div>
+      </Box>
 
       {error && <Alert severity="error">{error}</Alert>}
 
@@ -145,7 +177,9 @@ export default function WebScrape() {
             Results
           </Typography>
           {renderTable(listings)}
-          <DownloadExcel timestamp={timestamp} />
+          <Box sx={{ mt: 2 }}>
+            <DownloadExcel timestamp={timestamp} />
+          </Box>
         </>
       )}
     </Container>
