@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // pick up your Render (or localhost) backend URL from env
-const API = process.env.REACT_APP_BACKEND_URL || "";
+const API = process.env.REACT_APP_API_BASE_URL || "";
 
 // create a shared client
 const client = axios.create({

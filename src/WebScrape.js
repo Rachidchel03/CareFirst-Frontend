@@ -98,7 +98,7 @@ const WebScrape = () => {
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
       <Typography variant="h4" gutterBottom>
-        Funda Extraction & Bestemmingsplan
+        Care-First Dashboard
       </Typography>
 
       <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
@@ -109,7 +109,7 @@ const WebScrape = () => {
           fullWidth
           value={url}
           onChange={e => setUrl(e.target.value)}
-          placeholder="Enter URL to scrape"
+          placeholder="Enter URL"
         />
         <TextField
           label="Pages"
@@ -136,7 +136,7 @@ const WebScrape = () => {
           disabled={loading}
           sx={{ width: 200 }}
         >
-          {loading ? <CircularProgress size={24} /> : 'Scrape & Plan ophalen'}
+          {loading ? <CircularProgress size={24} /> : 'Date ophalen'}
         </Button>
       </div>
 
