@@ -64,7 +64,7 @@ function App() {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" noWrap>
-            Funda & Bestemmingsplan Dashboard
+            Care-First Dashboard
           </Typography>
         </Toolbar>
       </AppBar>
