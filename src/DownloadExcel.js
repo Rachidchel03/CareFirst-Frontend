@@ -13,7 +13,7 @@ export default function DownloadExcel({ timestamp }) {
       const blobUrl = window.URL.createObjectURL(new Blob([resp.data]));
       const a = document.createElement("a");
       a.href = blobUrl;
-      a.download = `data_${timestamp}.xlsx`;
+      a.download = `${timestamp}.xlsx`;
       document.body.appendChild(a);
       a.click();
       a.remove();
