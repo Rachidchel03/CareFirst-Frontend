@@ -2,7 +2,7 @@ import React from "react";
 import client from "./api";   // ← use the same client!
 
 import { Button } from "@mui/material";
-
+import BrandButton from './components/BrandButton';
 export default function DownloadExcel({ timestamp }) {
   const handleDownload = async () => {
     try {
@@ -23,8 +23,8 @@ export default function DownloadExcel({ timestamp }) {
   };
 
   return (
-    <Button variant="outlined" onClick={handleDownload} sx={{ mt: 2 }}>
+    <BrandButton variant="outlined" onClick={handleDownload} sx={{ mt: 2 }}>
       Download Excel
-    </Button>
+    </BrandButton>
   );
 }
