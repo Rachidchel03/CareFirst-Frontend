@@ -1,15 +1,16 @@
-// Authentication/AuthContext.js (schets)
+// src/Authentication/AuthContext.jsx
 import React, { createContext, useContext, useState, useEffect } from "react";
 
-const AuthCtx = createContext({ isAuth: false });
+const AuthCtx = createContext(null);
 
 export function AuthProvider({ children }) {
   const [isAuth, setIsAuth] = useState(!!localStorage.getItem("token"));
 
-  // ► luister op storage-events (andere tab) óf handmatig dispatch
   useEffect(() => {
-    function onStorage() {
-      setIsAuth(!!localStorage.getItem("token"));
+    function onStorage(e) {
+      if (e.key === "token") {
+        setIsAuth(!!localStorage.getItem("token"));
+      }
     }
     window.addEventListener("storage", onStorage);
     return () => window.removeEventListener("storage", onStorage);
@@ -23,5 +24,7 @@ export function AuthProvider({ children }) {
 }
 
 export function useAuth() {
-  return useContext(AuthCtx);
+  const ctx = useContext(AuthCtx);
+  if (!ctx) throw new Error("useAuth must be inside AuthProvider");
+  return ctx;
 }
