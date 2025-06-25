@@ -4,16 +4,13 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 const AuthCtx = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [isAuth, setIsAuth] = useState(!!localStorage.getItem("token"));
+  // 🚩 Start always as false
+  const [isAuth, setIsAuth] = useState(false);
 
+  // (Optional) If you want to auto‐login from a saved token:
   useEffect(() => {
-    function onStorage(e) {
-      if (e.key === "token") {
-        setIsAuth(!!localStorage.getItem("token"));
-      }
-    }
-    window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
+    const token = localStorage.getItem("token");
+    if (token) setIsAuth(true);
   }, []);
 
   return (
